@@ -1,5 +1,5 @@
 window.xtend = require('xtend')
-const {h, run, reactive, track, select} = require('../')
+const {h, run, reactive, track, select} = require('../../')
 
 var state = reactive({
   name: select('.name-type')
@@ -11,7 +11,7 @@ var state = reactive({
 })
 
 function Main () {
-  let name = state.$.name
+  let name = state.name
 
   return h('div.root', [
     h('input.name-type', {
@@ -24,8 +24,8 @@ function Main () {
 }
 
 function Description () {
-  let desc = state.$.desc
-  let name = state.$.name
+  let desc = state.desc
+  let name = state.name
 
   return h('div.description', [
     h('textarea.desc-type', {

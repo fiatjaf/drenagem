@@ -7,13 +7,13 @@ var tracking = null
 
 function reactive (def) {
   var cachedvalues = {}
-  var state = {'$': {}}
+  var state = {}
 
   Object.keys(def).map(attr => {
     state[attr] = def[attr]
 
     trackedrefs[attr] = new Map()
-    Object.defineProperty(state.$, attr, {
+    Object.defineProperty(state, attr, {
       get: () => {
         if (tracking) {
           let {tag, trackref, component} = tracking
@@ -42,7 +42,6 @@ function reactive (def) {
 }
 
 function h (tag) {
-  console.log(`rendering ${tag}.`)
   if (typeof tag === 'function') {
     var trackref = {}
     let component = createClass({
@@ -85,10 +84,8 @@ track.named = function (name) {
 }
 
 function select (selector) {
-  console.log('selected a dom node for events', selector)
   return {
     events (selectedType) {
-      console.log('listen to events', selectedType, 'on', selector)
       return eventstream
         .filter(meta =>
           matchesSelector(meta.element, selector)
