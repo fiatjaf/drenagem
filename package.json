@@ -1,0 +1,35 @@
+{
+  "name": "fluctuation",
+  "version": "0.0.1",
+  "description": "a framework that takes the best out of cycle, react and mobx.",
+  "main": "index.js",
+  "dependencies": {
+    "create-react-class": "^15.5.3",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "react-hyperscript": "^3.0.0",
+    "xstream": "^10.8.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cycles",
+    "fluctuations",
+    "hayek",
+    "mobx",
+    "react",
+    "virtual-dom",
+    "observable",
+    "streams",
+    "xstream",
+    "cyclejs",
+    "state",
+    "stateful",
+    "dom",
+    "driver"
+  ],
+  "author": "Giovanni T. Parra",
+  "license": "ISC"
+}
