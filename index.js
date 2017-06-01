@@ -29,12 +29,10 @@ function observable (def) {
       next: v => {
         cachedvalues[attr] = v
         trackedrefs[attr].forEach(rerender => {
-          console.log(`rerendering ${rerender.componentName}.`)
           rerender()
         })
       },
-      error: e => console.log(`error on stream ${attr}:`, e),
-      complete: () => console.log(`stream ${attr} is completed.`)
+      error: e => console.log(`error on stream ${attr}:`, e)
     })
   })
 
@@ -50,25 +48,18 @@ function observer (renderFunction) {
     componentWillUnmount () {
       this._isMounted = false
     },
-    track () {
-      let rerender = this.rerender
-      rerender.componentName = renderFunction.name
-      tracking = rerender
-    },
     rerender () {
       if (this._isMounted) {
+        console.log(`rerendering ${renderFunction.name} with props ${JSON.stringify(this.props)}.`)
         this.forceUpdate()
       }
     },
-    componentWillMount () {
-      this.track()
-    },
-    shouldComponentUpdate () {
-      this.track()
-      return true
-    },
     render () {
-      return renderFunction.call(this, this.props)
+      tracking = this.rerender
+      tracking.id = `${renderFunction.name}, props ${JSON.stringify(this.props)}`
+      let vdom = renderFunction.call(this, this.props)
+      tracking = null
+      return vdom
     }
   })
 
