@@ -1,7 +1,7 @@
 {
-  "name": "fluctuation",
-  "version": "0.0.1",
-  "description": "a framework that takes the best out of cycle, react and mobx.",
+  "name": "drenagem",
+  "version": "0.0.2",
+  "description": "A framework that takes the best out of Cycle, React and Mobx.",
   "main": "index.js",
   "dependencies": {
     "create-react-class": "^15.5.3",
@@ -11,7 +11,6 @@
     "react-hyperscript": "^3.0.0",
     "xstream": "^10.8.0"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -32,5 +31,17 @@
     "driver"
   ],
   "author": "Giovanni T. Parra",
-  "license": "ISC"
+  "license": "ISC",
+  "directories": {
+    "example": "examples"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fiatjaf/drenagem.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fiatjaf/drenagem/issues"
+  },
+  "homepage": "https://github.com/fiatjaf/drenagem#readme"
 }
