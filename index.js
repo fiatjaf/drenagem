@@ -2,10 +2,10 @@ const Set = require('es6-set')
 const createClass = require('create-react-class')
 const xs = require('xstream').default
 
-var trackedrefs = {}
 var tracking = null
 
 function observable (def) {
+  var trackedrefs = {}
   var cachedvalues = {}
   var state = {}
 
