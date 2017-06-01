@@ -1,3 +1,4 @@
+const Set = require('es6-set')
 const createClass = require('create-react-class')
 const render = require('react-dom').render
 const xs = require('xstream').default
@@ -12,13 +13,12 @@ function reactive (def) {
   Object.keys(def).map(attr => {
     state[attr] = def[attr]
 
-    trackedrefs[attr] = new Map()
+    trackedrefs[attr] = new Set()
     Object.defineProperty(state, attr, {
       get: () => {
         if (tracking) {
-          let {tag, trackref, component} = tracking
-          console.log(`tracking .${attr} access from ${component.displayName}.`)
-          trackedrefs[attr].set(tag, trackref)
+          let rerender = tracking
+          trackedrefs[attr].add(rerender)
         }
         return cachedvalues[attr]
       }
@@ -29,8 +29,9 @@ function reactive (def) {
     stream.addListener({
       next: v => {
         cachedvalues[attr] = v
-        trackedrefs[attr].forEach(ref => {
-          if (ref.forceUpdate) ref.forceUpdate()
+        trackedrefs[attr].forEach(rerender => {
+          console.log(`rerendering ${rerender.componentName}.`)
+          rerender()
         })
       },
       error: e => console.log(`error on stream ${attr}:`, e),
@@ -41,27 +42,40 @@ function reactive (def) {
   return state
 }
 
+var componentCache = new Map()
 function h (tag) {
   if (typeof tag === 'function') {
-    var trackref = {}
-    let component = createClass({
+    let component = componentCache.get(tag) || createClass({
       displayName: tag.name,
       componentDidMount () {
-        trackref.forceUpdate = () => {
-          console.log(`forceUpdating ${tag.name}.`)
+        this._isMounted = true
+      },
+      componentWillUnmount () {
+        this._isMounted = false
+      },
+      track () {
+        let rerender = this.rerender
+        rerender.componentName = tag.name
+        tracking = rerender
+      },
+      rerender () {
+        if (this._isMounted) {
           this.forceUpdate()
         }
+      },
+      componentWillMount () {
+        this.track()
+      },
+      shouldComponentUpdate () {
+        this.track()
+        return true
       },
       render () {
         return tag.call(this, this.props)
       }
     })
+    componentCache.set(tag, component)
 
-    tracking = {tag, trackref, component}
-    try {
-      tag({})
-    } catch (e) {}
-    tracking = null
     return require('react').createElement(component, arguments[1], arguments[2])
   }
   return require('react-hyperscript').apply(null, arguments)
@@ -72,14 +86,12 @@ function run (element, vrender) {
 }
 
 var eventstream = xs.create()
-  .debug('event')
 function track (e) {
-  console.log('tracked event', e)
-  eventstream.shamefullySendNext({e, element: e.target, type: e.type})
+  eventstream.shamefullySendNext({e, element: e.currentTarget, type: e.type})
 }
 track.named = function (name) {
   return e => {
-    eventstream.shamefullySendNext({e, element: e.target, type: e.type, name})
+    eventstream.shamefullySendNext({e, element: e.currentTarget, type: e.type, name})
   }
 }
 

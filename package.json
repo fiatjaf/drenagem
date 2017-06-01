@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "create-react-class": "^15.5.3",
+    "es6-set": "^0.1.5",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "react-hyperscript": "^3.0.0",

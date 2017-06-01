@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "bubleify": "^0.7.0",
+    "xstream": "^10.8.0",
     "xtend": "^4.0.1"
   }
 }
