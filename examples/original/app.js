@@ -1,7 +1,10 @@
 window.xtend = require('xtend')
-const {h, run, reactive, track, select} = require('../../')
+const h = require('react-hyperscript')
+const render = require('react-dom').render
+const React = require('react')
+const {observable, observer, track, select} = require('../../')
 
-var state = reactive({
+var state = observable({
   name: select('.name-type')
     .events('change')
     .map(e => e.target.value),
@@ -10,7 +13,7 @@ var state = reactive({
     .map(e => e.target.value)
 })
 
-function Main () {
+const Main = observer(function Main () {
   let name = state.name
 
   return h('div.root', [
@@ -21,9 +24,9 @@ function Main () {
     h('h1', `hello ${name}`),
     h(Description)
   ])
-}
+})
 
-function Description () {
+const Description = observer(function Description () {
   let desc = state.desc
   let name = state.name
 
@@ -34,6 +37,6 @@ function Description () {
     }),
     h('div', `${name}, you are ${desc}`)
   ])
-}
+})
 
-run(document.getElementById('root'), Main)
+render(React.createElement(Main), document.getElementById('root'))

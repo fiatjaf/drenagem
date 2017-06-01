@@ -1,6 +1,9 @@
 window.xtend = require('xtend')
 const xs = require('xstream').default
-const {h, run, reactive, track, select} = require('../../')
+const h = require('react-hyperscript')
+const render = require('react-dom').render
+const React = require('react')
+const {observable, observer, track, select} = require('../../')
 
 let text = select('textarea')
   .events('change')
@@ -21,7 +24,7 @@ let mouseleave = select('.calculation')
 
 let hovered = xs.merge(mouseenter, mouseleave)
 
-var state = reactive({
+var state = observable({
   text,
   clicked,
   hovered,
@@ -31,7 +34,7 @@ var state = reactive({
   numberoflines: text.map(t => t.split(/\n/g).length)
 })
 
-function Main () {
+const Main = observer(function Main () {
   return (
     h('div', [
       h('label', [
@@ -53,9 +56,9 @@ function Main () {
       ))
     ])
   )
-}
+})
 
-function CalculationShow ({calculation}) {
+const CalculationShow = observer(function CalculationShow ({calculation}) {
   let hovered = state.hovered === calculation
   let clicked = state.clicked === calculation
 
@@ -78,6 +81,6 @@ function CalculationShow ({calculation}) {
       h('strong', state[calculation])
     ])
   )
-}
+})
 
-run(document.getElementById('root'), Main)
+render(React.createElement(Main), document.getElementById('root'))

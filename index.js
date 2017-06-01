@@ -1,12 +1,11 @@
 const Set = require('es6-set')
 const createClass = require('create-react-class')
-const render = require('react-dom').render
 const xs = require('xstream').default
 
 var trackedrefs = {}
 var tracking = null
 
-function reactive (def) {
+function observable (def) {
   var cachedvalues = {}
   var state = {}
 
@@ -42,47 +41,38 @@ function reactive (def) {
   return state
 }
 
-var componentCache = new Map()
-function h (tag) {
-  if (typeof tag === 'function') {
-    let component = componentCache.get(tag) || createClass({
-      displayName: tag.name,
-      componentDidMount () {
-        this._isMounted = true
-      },
-      componentWillUnmount () {
-        this._isMounted = false
-      },
-      track () {
-        let rerender = this.rerender
-        rerender.componentName = tag.name
-        tracking = rerender
-      },
-      rerender () {
-        if (this._isMounted) {
-          this.forceUpdate()
-        }
-      },
-      componentWillMount () {
-        this.track()
-      },
-      shouldComponentUpdate () {
-        this.track()
-        return true
-      },
-      render () {
-        return tag.call(this, this.props)
+function observer (renderFunction) {
+  let component = createClass({
+    displayName: renderFunction.name,
+    componentDidMount () {
+      this._isMounted = true
+    },
+    componentWillUnmount () {
+      this._isMounted = false
+    },
+    track () {
+      let rerender = this.rerender
+      rerender.componentName = renderFunction.name
+      tracking = rerender
+    },
+    rerender () {
+      if (this._isMounted) {
+        this.forceUpdate()
       }
-    })
-    componentCache.set(tag, component)
+    },
+    componentWillMount () {
+      this.track()
+    },
+    shouldComponentUpdate () {
+      this.track()
+      return true
+    },
+    render () {
+      return renderFunction.call(this, this.props)
+    }
+  })
 
-    return require('react').createElement(component, arguments[1], arguments[2])
-  }
-  return require('react-hyperscript').apply(null, arguments)
-}
-
-function run (element, vrender) {
-  render(h(vrender), element)
+  return component
 }
 
 var eventstream = xs.create()
@@ -122,9 +112,8 @@ function matchesSelector (elem, selector) {
 }
 
 module.exports = {
-  h,
-  run,
-  reactive,
+  observable,
+  observer,
   track,
   select
 }
