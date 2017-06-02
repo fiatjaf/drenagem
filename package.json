@@ -1,11 +1,12 @@
 {
   "name": "drenagem",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A framework that takes the best out of Cycle, React and Mobx.",
   "main": "index.js",
   "dependencies": {
     "create-react-class": "^15.5.3",
     "es6-set": "^0.1.5",
+    "react-mixin": "^3.0.5",
     "xstream": "^10.8.0"
   },
   "scripts": {
