@@ -1,0 +1,22 @@
+{
+  "browserify": {
+    "transform": [
+      [
+        "bubleify",
+        {
+          "transforms": {
+            "dangerousTaggedTemplateString": true
+          },
+          "objectAssign": "xtend",
+          "sourceMap": true
+        }
+      ]
+    ]
+  },
+  "dependencies": {
+    "bubleify": "^0.7.0",
+    "react-highlight": "^0.10.0",
+    "react-hyperscript": "^3.0.0",
+    "xtend": "^4.0.1"
+  }
+}
