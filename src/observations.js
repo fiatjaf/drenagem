@@ -1,10 +1,9 @@
-const Set = require('es6-set')
-const React = require('react')
-const createClass = require('create-react-class')
+import Set from 'es6-set'
+import { Component } from 'react'
 
 var tracking = null
 
-function observable (def) {
+export function observable (def) {
   var trackedrefs = {}
   var cachedvalues = {}
   var state = {}
@@ -39,20 +38,22 @@ function observable (def) {
   return state
 }
 
-function observer (component) {
+export function observer (component) {
   // the given component is a function, not a proper react component class
   if (typeof component === 'function' &&
       (!component.prototype || !component.prototype.render) &&
-      !React.Component.isPrototypeOf(component) &&
+      !Component.isPrototypeOf(component) &&
       !component.isReactClass) {
     // wrap it in a react component
-    return observer(createClass({  
-      displayName: component.displayName || component.name,
-      propTypes: component.propTypes,  
-      contextTypes: component.contextTypes,
-      defaultProps: component.defaultProps,  
+    class wrapped extends Component {
       render () { return component.call(this, this.props, this.context) }
-    }))
+    }
+    wrapped.displayName = component.displayName || component.name
+    wrapped.propTypes = component.propTypes
+    wrapped.contextTypes = component.contextTypes
+    wrapped.defaultProps = component.defaultProps
+
+    return observer(wrapped)
   }
 
   let name = `<${component.displayName ||
@@ -98,9 +99,4 @@ const reactiveMixin = {
   componentWillUnmount () {
     this.___isMounted = false
   }
-}
-
-module.exports = {
-  observer,
-  observable
 }

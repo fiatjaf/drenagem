@@ -1,9 +1,9 @@
-const xs = require('xstream').default
+import xs from 'xstream'
 
 /* --- track --- */
 
 let globalEventstream = xs.create()
-function track (e) {
+export function track (e) {
   globalEventstream.shamefullySendNext({e, element: e.currentTarget})
 }
 track.preventDefault = function (e) {
@@ -43,7 +43,7 @@ track.preventDefault.named = function (name, value) {
 
 /* --- select --- */
 
-function select (selector) {
+export function select (selector) {
   return {
     events (selectedType) {
       return globalEventstream
