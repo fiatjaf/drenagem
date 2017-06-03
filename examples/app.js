@@ -6,7 +6,7 @@ const React = require('react')
 const xs = require('xstream').default
 const flattenConcurrently = require('xstream/extra/flattenConcurrently').default
 const Highlight = require('react-highlight')
-const {observable, observer, track, select} = require('../')
+const {observable, observer, track, select} = require('dreno')
 
 let examples = xs.fromPromise(
   fetch('https://api.github.com/repos/fiatjaf/drenagem/git/trees/master')

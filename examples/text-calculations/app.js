@@ -3,7 +3,7 @@ const xs = require('xstream').default
 const h = require('react-hyperscript')
 const render = require('react-dom').render
 const React = require('react')
-const {observable, observer, track, select} = require('../../')
+const {observable, observer, track, select} = require('dreno')
 
 let text = select('textarea')
   .events('change')
