@@ -1,7 +1,6 @@
 const Set = require('es6-set')
 const React = require('react')
 const createClass = require('create-react-class')
-const mixin = require('react-mixin')
 
 var tracking = null
 
@@ -47,22 +46,36 @@ function observer (component) {
       !React.Component.isPrototypeOf(component) &&
       !component.isReactClass) {
     // wrap it in a react component
-    return observer(createClass({
-      displayName: component.name,
-      propTypes: component.propTypes,
+    return observer(createClass({  
+      displayName: component.displayName || component.name,
+      propTypes: component.propTypes,  
       contextTypes: component.contextTypes,
-      defaultProps: component.defaultProps,
+      defaultProps: component.defaultProps,  
       render () { return component.call(this, this.props, this.context) }
     }))
   }
 
+  let name = `<${component.displayName ||
+             component.prototype && component.prototype.displayName ||
+             'unnamed-component'}>`
+
   // now we are sure the component is a proper react component class
   // we can only patch it.
-  mixin(component.prototype, reactiveMixin)
+  let target = component.prototype || component
+  for (let func in reactiveMixin) {
+    let base = target[func]
+    target[func] = base
+      ? function () {
+        base.apply(this, arguments)
+        reactiveMixin[func].apply(this, arguments)
+      }
+      : reactiveMixin[func]
+  }
 
   let baseRender = component.prototype.render
   component.prototype.render = function () {
     tracking = this.rerender
+    console.log(`rendering ${name} with props ${JSON.stringify(this.props)}.`)
     let vdom = baseRender.call(this, this.props, this.context)
     tracking = null
     return vdom
@@ -72,18 +85,18 @@ function observer (component) {
 }
 
 function rerender () {
-  console.log(`rerendering ${this.displayName} with props ${JSON.stringify(this.props)}.`)
-  this.forceUpdate()
+  if (this.___isMounted) {
+    this.forceUpdate()
+  }
 }
 
 const reactiveMixin = {
   componentWillMount () {
-    let rr = this._rerender || rerender.bind(this)
-    this._rerender = rr
-    this.rerender = rr
+    this.___isMounted = true
+    this.rerender = rerender.bind(this)
   },
   componentWillUnmount () {
-    this.rerender = () => {}
+    this.___isMounted = false
   }
 }
 

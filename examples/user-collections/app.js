@@ -56,7 +56,7 @@ const Main = observer(function Main () {
 })
 
 const User = observer(createClass({
-  displayUser: 'User',
+  displayName: 'User',
   render () {
     let {id, name} = state.users[this.props.index]
 
