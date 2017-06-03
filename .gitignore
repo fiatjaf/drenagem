@@ -3,3 +3,4 @@ node_modules
 *.swo
 browserify-cache.json
 npm-debug.log
+package-lock.json
