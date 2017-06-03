@@ -63,15 +63,15 @@ select.named = function (name) {
   return namedEventstreams[name] || xs.empty()
 }
 
-const proto = window.Element.prototype
-const vendor = proto.matches || proto.matchesSelector || proto.webkitMatchesSelector || proto.mozMatchesSelector || proto.msMatchesSelector || proto.oMatchesSelector
-function matchesSelector (elem, selector) {
-  return vendor.call(elem, selector)
+var matchesSelector
+if (typeof window !== 'undefined') {
+  const proto = window.Element.prototype
+  const vendor = proto.matches || proto.matchesSelector || proto.webkitMatchesSelector || proto.mozMatchesSelector || proto.msMatchesSelector || proto.oMatchesSelector
+  matchesSelector = function (elem, selector) {
+    return vendor.call(elem, selector)
+  }
+} else {
+  matchesSelector = function () { return false }
 }
 
 /* --- */
-
-module.exports = {
-  track,
-  select
-}

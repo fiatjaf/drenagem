@@ -1,6 +1,6 @@
 {
   "name": "dreno",
-  "version": "0.1.1",
+  "version": "0.1.4",
   "description": "A framework that takes the best out of Cycle, React and Mobx.",
   "main": "src/index.js",
   "dev:main": "src/index.js",
