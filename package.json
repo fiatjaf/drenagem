@@ -1,5 +1,5 @@
 {
-  "name": "drenagem",
+  "name": "dreno",
   "version": "0.0.4",
   "description": "A framework that takes the best out of Cycle, React and Mobx.",
   "main": "index.js",
@@ -9,17 +9,14 @@
     "react-mixin": "^3.0.5",
     "xstream": "^10.8.0"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [
     "cycles",
-    "fluctuations",
-    "hayek",
     "mobx",
     "react",
     "virtual-dom",
     "observable",
+    "observer",
+    "component",
     "streams",
     "xstream",
     "cyclejs",
@@ -30,16 +27,8 @@
   ],
   "author": "Giovanni T. Parra",
   "license": "ISC",
-  "directories": {
-    "example": "examples"
-  },
-  "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fiatjaf/drenagem.git"
-  },
-  "bugs": {
-    "url": "https://github.com/fiatjaf/drenagem/issues"
-  },
-  "homepage": "https://github.com/fiatjaf/drenagem#readme"
+    "url": "git+https://github.com/fiatjaf/dreno.git"
+  }
 }

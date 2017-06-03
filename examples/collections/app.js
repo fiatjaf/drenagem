@@ -6,7 +6,12 @@ const React = require('react')
 const createClass = require('create-react-class')
 const {observable, observer, track, select} = require('../../')
 
-let names = select('.new')
+let deleted = select('button.del')
+  .events('click')
+  .map(e => e.currentTarget.parentNode.parentNode.dataset.id)
+  .startWith(null)
+
+let namesCreated = select('.new')
   .events('click')
   .map(e => e.preventDefault() || e)
   .fold((acc, e) => {
@@ -23,8 +28,19 @@ let names = select('.new')
     ].concat(acc)
   }, [])
 
+let names = xs.combine(namesCreated, deleted)
+  .map(([names, deleted]) => {
+    for (let i = 0; i < names.length; i++) {
+      if (names[i].id === deleted) {
+        names.splice(i, 1)
+        return names
+      }
+    }
+    return names
+  })
+
 var state = observable({
-  names
+  names: names.startWith([])
 })
 
 const Main = observer(function Main () {
@@ -41,7 +57,7 @@ const Main = observer(function Main () {
 })
 
 const Name = observer(createClass({
-  displayName: 'Name!',
+  displayName: 'Name',
   render () {
     let {id, name} = state.names[this.props.index]
 
@@ -56,7 +72,8 @@ const Name = observer(createClass({
       }, [
         h('div', [
           'type a name: ',
-          h('input', {value: name, onChange: track})
+          h('input', {value: name, onChange: track}),
+          h('button.del', {onClick: track}, 'x')
         ]),
         h('span', `the id is "${id}", the name is "${name}".`)
       ])

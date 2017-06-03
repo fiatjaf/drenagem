@@ -30,7 +30,7 @@ let examples = xs.fromPromise(
 let selected = select('.example-item a')
   .events('click')
   .map(e => e.currentTarget.href.split('#')[1].slice(1))
-  .startWith(location.hash.slice(2) || '.')
+  .startWith(location.hash.slice(2) || 'add-one')
 
 let code = selected
   .map(name => xs.fromPromise(Promise.all([
