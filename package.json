@@ -1,10 +1,8 @@
 {
   "name": "dreno",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A framework that takes the best out of Cycle, React and Mobx.",
-  "main": "src/index.js",
-  "dev:main": "src/index.js",
-  "cjs:main": "lib/dreno.cjs.js",
+  "main": "lib/dreno.cjs.js",
   "jsnext:main": "lib/dreno.es.js",
   "module": "lib/dreno.es.js",
   "files": [
@@ -13,7 +11,8 @@
   "dependencies": {
     "create-react-class": "^15.5.3",
     "es6-set": "^0.1.5",
-    "react": "^15.5.4"
+    "react": "^15.5.4",
+    "xstream": "^10.8.0"
   },
   "peerDependencies": {
     "react": ">=15",
@@ -21,8 +20,7 @@
   },
   "scripts": {
     "build": "node ./bin/build.rollup.js",
-    "prepublish": "npm run build && cat package.json | jq '.main = .[\"cjs:main\"]' > tmp.json && mv tmp.json package.json",
-    "postpublish": "cat package.json | jq '.main = .[\"dev:main\"]' > tmp.json && mv tmp.json package.json"
+    "prepare": "npm run build"
   },
   "keywords": [
     "cycles",

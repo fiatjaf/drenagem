@@ -9,30 +9,35 @@ export function observable (def) {
   var state = {}
 
   Object.keys(def).map(attr => {
-    state[attr] = def[attr]
+    if (def[attr].setDebugListener /* is a stream */) {
+      trackedrefs[attr] = new Set()
 
-    trackedrefs[attr] = new Set()
-    Object.defineProperty(state, attr, {
-      get: () => {
-        if (tracking) {
-          let rerender = tracking
-          trackedrefs[attr].add(rerender)
+      // register property access.
+      Object.defineProperty(state, attr, {
+        get: () => {
+          if (tracking) {
+            let rerender = tracking
+            trackedrefs[attr].add(rerender)
+          }
+          return cachedvalues[attr]
         }
-        return cachedvalues[attr]
-      }
-    })
+      })
 
-    let stream = def[attr]
-    if (!stream.addListener) return
-    stream.addListener({
-      next: v => {
-        cachedvalues[attr] = v
-        trackedrefs[attr].forEach(rerender => {
-          rerender()
-        })
-      },
-      error: e => console.log(`error on stream ${attr}:`, e)
-    })
+      let stream = def[attr]
+
+      // listen to the stream events to update this state.
+      stream.addListener({
+        next: v => {
+          cachedvalues[attr] = v
+          trackedrefs[attr].forEach(rerender => {
+            rerender()
+          })
+        },
+        error: e => console.log(`error on stream ${attr}:`, e)
+      })
+    } else /* not a stream, so just store the value */ {
+      state[attr] = def[attr]
+    }
   })
 
   return state
@@ -45,7 +50,7 @@ export function observer (component) {
       !Component.isPrototypeOf(component) &&
       !component.isReactClass) {
     // wrap it in a react component
-    class wrapped extends Component {
+    const wrapped = class extends Component {
       render () { return component.call(this, this.props, this.context) }
     }
     wrapped.displayName = component.displayName || component.name
