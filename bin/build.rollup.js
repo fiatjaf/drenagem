@@ -2,26 +2,26 @@ const rollup = require('rollup')
 const commonjs = require('rollup-plugin-commonjs')
 const resolve = require('rollup-plugin-node-resolve')
 const buble = require('rollup-plugin-buble')
-
-let plugins = [
-  resolve({
-    jsnext: true,
-    main: true,
-    customResolveOptions: {
-      moduleDirectory: 'node_modules'
-    }
-  }),
-  commonjs({
-    namedExports: {
-      'react': [ 'Component' ]
-    }
-  }),
-  buble({ dangerousTaggedTemplateString: true })
-]
+const sourcemaps = require('rollup-plugin-sourcemaps')
 
 rollup.rollup({
   entry: 'src/index.js',
-  plugins: plugins,
+  plugins: [
+    resolve({
+      jsnext: true,
+      main: true,
+      customResolveOptions: {
+        moduleDirectory: 'node_modules'
+      }
+    }),
+    commonjs({
+      namedExports: {
+        'react': [ 'Component' ]
+      }
+    }),
+    buble({ dangerousTaggedTemplateString: true }),
+    sourcemaps()
+  ],
   external: [ 'react', 'xstream' ]
 })
 .then(bundle => {
@@ -39,13 +39,15 @@ rollup.rollup({
 
   bundle.write({
     format: 'es',
-    dest: 'lib/dreno.es.js'
+    dest: 'lib/dreno.es.js',
+    sourceMap: true
   })
   .then(() => console.log('written lib/dreno.es.js'))
 
   bundle.write({
     format: 'cjs',
-    dest: 'lib/dreno.cjs.js'
+    dest: 'lib/dreno.cjs.js',
+    sourceMap: true
   })
   .then(() => console.log('written lib/dreno.cjs.js'))
 })
