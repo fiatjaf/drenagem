@@ -2,9 +2,9 @@ import xs from 'xstream'
 
 /* --- track --- */
 
-let globalEventstream = xs.create()
+var eventStreams = xs.create()
 export function track (e) {
-  globalEventstream.shamefullySendNext({e, element: e.currentTarget})
+  eventStreams['__global__'].shamefullySendNext({e, element: e.currentTarget})
 }
 track.preventDefault = function (e) {
   e.preventDefault()
@@ -13,54 +13,51 @@ track.preventDefault = function (e) {
 
 track.withValue = function (value) {
   return (e) => {
-    globalEventstream.shamefullySendNext({e, value, element: e.currentTarget})
+    eventStreams['__global__'].shamefullySendNext({e, value, element: e.currentTarget})
   }
 }
 track.preventDefault.withValue = function (value) {
   return (e) => {
     e.preventDefault()
-    globalEventstream.shamefullySendNext({e, value, element: e.currentTarget})
+    eventStreams['__global__'].shamefullySendNext({e, value, element: e.currentTarget})
   }
 }
 
-var namedEventstreams = {}
-track.named = function (name, value) {
-  let eventstream = namedEventstreams[name] || xs.create()
-  namedEventstreams[name] = eventstream
+track.tag = function (name, value) {
+  let eventStream = eventStreams[name] || xs.create()
+  eventStreams[name] = eventStream
   return e => {
-    eventstream.shamefullySendNext({e, value, element: e.currentTarget})
+    eventStreams['__global__'].shamefullySendNext({e, value, element: e.currentTarget})
+    eventStream.shamefullySendNext({e, value, element: e.currentTarget})
   }
 }
-track.preventDefault.named = function (name, value) {
-  let eventstream = namedEventstreams[name] || xs.create()
-  namedEventstreams[name] = eventstream
+track.preventDefault.tag = function (name, value) {
+  let eventStream = eventStreams[name] || xs.create()
+  eventStreams[name] = eventStream
   return e => {
     e.preventDefault()
-    eventstream.shamefullySendNext({e, value, element: e.currentTarget})
+    eventStreams['__global__'].shamefullySendNext({e, value, element: e.currentTarget})
+    eventStream.shamefullySendNext({e, value, element: e.currentTarget})
   }
 }
 
 
 /* --- select --- */
 
-export function select (selector) {
-  return {
-    events (selectedType) {
-      return globalEventstream
-        .filter(meta =>
-          matchesSelector(meta.element, selector)
-        )
-        .filter(meta =>
-          meta.e.type === selectedType
-        )
-        .map(meta =>
-          meta.value || meta.e
-        )
-    }
+export function select (selector, tag = '__global__') {
+  let ee = eventStreams[tag] || xs.create()
+  eventStreams[tag] = ee
+
+  ee = ee
+    .filter(meta => matchesSelector(meta.element, selector))
+
+  ee.events = function (selectedType) {
+    return ee
+      .filter(meta => meta.e.type === selectedType || !selectedType)
+      .map(meta => meta.e)
   }
-}
-select.named = function (name) {
-  return namedEventstreams[name] || xs.empty()
+
+  return ee
 }
 
 var matchesSelector

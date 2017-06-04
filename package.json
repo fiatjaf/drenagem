@@ -1,6 +1,6 @@
 {
   "name": "dreno",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A framework that takes the best out of Cycle, React and Mobx.",
   "main": "lib/dreno.cjs.js",
   "jsnext:main": "lib/dreno.es.js",
