@@ -1,6 +1,6 @@
 {
   "name": "dreno",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "A framework that takes the best out of Cycle, React and Mobx.",
   "main": "lib/dreno.cjs.js",
   "jsnext:main": "lib/dreno.es.js",
@@ -38,7 +38,7 @@
     "dom",
     "driver"
   ],
-  "author": "Giovanni T. Parra",
+  "author": "fiatjaf",
   "license": "ISC",
   "repository": {
     "type": "git",
