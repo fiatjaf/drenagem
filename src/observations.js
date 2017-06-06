@@ -1,46 +1,115 @@
-import Set from 'es6-set'
 import { Component } from 'react'
+import { report } from './debug'
 
-var tracking = null
+var tracker = null
+var allObservables = new Set()
 
-export function observable (def) {
-  var trackedrefs = {}
-  var cachedvalues = {}
-  var state = {}
+class Observable {
+  constructor (initialValues = {}) {
+    var streams = {}
+    var cache = {}
+    var observers = new Map()
+    var trackedattrs = {}
 
-  Object.keys(def).map(attr => {
-    if (def[attr].setDebugListener /* is a stream */) {
-      trackedrefs[attr] = new Set()
+    Object.defineProperty(this, '$', {get: () => streams})
+    Object.defineProperty(this, 'cache', {get: () => cache})
+    Object.defineProperty(this, 'observers', {get: () => observers})
+    Object.defineProperty(this, 'trackedattrs', {get: () => trackedattrs})
 
-      // register property access.
-      Object.defineProperty(state, attr, {
+    allObservables.add(this)
+
+    for (let attr in initialValues) {
+      let v = initialValues[attr]
+      this.set(attr, v)
+    }
+  }
+
+  get (attr) {
+    return this[attr]
+  }
+
+  set (attr, v) {
+    if (v.setDebugListener) {
+      // is a xstream stream.
+      // make it read values from the cache.
+      Object.defineProperty(this, attr, {
         get: () => {
-          if (tracking) {
-            let rerender = tracking
-            trackedrefs[attr].add(rerender)
-          }
-          return cachedvalues[attr]
-        }
+          // register property access
+          this.registerAccess(tracker, attr)
+          return this.cache[attr]
+        },
+        enumerable: true
       })
 
-      let stream = def[attr]
-
-      // listen to the stream events to update this state.
+      // then start listening listen to the stream events
+      // to update the this.cache.
+      let stream = v
       stream.addListener({
         next: v => {
-          cachedvalues[attr] = v
-          trackedrefs[attr].forEach(rerender => {
-            rerender()
-          })
-        },
-        error: e => console.log(`error on stream ${attr}:`, e)
-      })
-    } else /* not a stream, so just store the value */ {
-      state[attr] = def[attr]
-    }
-  })
+          if (v !== this.cache[attr]) {
+            this.cache[attr] = v
 
-  return state
+            // every time an attribute is updated we
+            // tell all its observers to rerun.
+            this.trackedattrs[attr] = this.trackedattrs[attr] || new Set()
+            this.trackedattrs[attr].forEach(rerun => {
+              rerun()
+            })
+          }
+        },
+        error: e => {
+          console.error(`error on stream ${attr}:`, e)
+          this.cache[attr] = e
+        }
+      })
+      this.$[attr] = stream
+    } else {
+      // a normal value. just store the value.
+      this[attr] = v
+    }
+  }
+
+  has (attr) {
+    return attr in this
+  }
+
+  keys () {
+    return Object.keys(this)
+  }
+
+  values () {
+    return Object.keys(this).map(attr => this[attr])
+  }
+
+  entries () {
+    return Object.keys(this).map(attr => [attr, this[attr]])
+  }
+
+  forEach (callback, thisArg) {
+    for (let attr in this) {
+      callback.call(thisArg, attr, this[attr])
+    }
+  }
+
+  registerAccess (observer, attr) {
+    let attrs = this.observers.get(observer) || new Set()
+    attrs.add(attr)
+    this.observers.set(observer, attrs)
+    this.trackedattrs[attr] = this.trackedattrs[attr] || new Set()
+    this.trackedattrs[attr].add(observer)
+  }
+
+  resetTrackedProperties (observer) {
+    let attrs = this.observers.get(observer) || []
+    attrs.forEach((attr) => {
+      this.trackedattrs[attr].delete(observer)
+    })
+    this.observers.set(observer, new Set())
+  }
+}
+
+export function observable (def) {
+  return new Observable(def)
 }
 
 export function observer (component) {
@@ -54,6 +123,7 @@ export function observer (component) {
       render () { return component.call(this, this.props, this.context) }
     }
     wrapped.displayName = component.displayName || component.name
+    wrapped.prototype.displayName = component.displayName || component.name
     wrapped.propTypes = component.propTypes
     wrapped.contextTypes = component.contextTypes
     wrapped.defaultProps = component.defaultProps
@@ -61,9 +131,9 @@ export function observer (component) {
     return observer(wrapped)
   }
 
-  let name = `<${component.displayName ||
-             component.prototype && component.prototype.displayName ||
-             'unnamed-component'}>`
+  // let name = `<${component.displayName ||
+  //            component.prototype && component.prototype.displayName ||
+  //            'unnamed-component'}>`
 
   // now we are sure the component is a proper react component class
   // we can only patch it.
@@ -80,10 +150,16 @@ export function observer (component) {
 
   let baseRender = component.prototype.render
   component.prototype.render = function () {
-    tracking = this.rerender
-    console.log(`rendering ${name} with props ${JSON.stringify(this.props)}.`)
+    allObservables.forEach(o => {
+      o.resetTrackedProperties(o)
+    })
+
+    // console.log(`rendering ${name} with props ${JSON.stringify(this.props)}.`)
+
+    tracker = this.rerender
     let vdom = baseRender.call(this, this.props, this.context)
-    tracking = null
+    tracker = null
+
     return vdom
   }
 
@@ -92,6 +168,7 @@ export function observer (component) {
 
 function rerender () {
   if (this.___isMounted) {
+    report.render(this)
     this.forceUpdate()
   }
 }

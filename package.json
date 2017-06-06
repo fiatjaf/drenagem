@@ -10,12 +10,13 @@
   ],
   "dependencies": {
     "create-react-class": "^15.5.3",
-    "es6-set": "^0.1.5",
     "react": "^15.5.4",
+    "react-dom": "^15.5.4",
     "xstream": "^10.8.0"
   },
   "peerDependencies": {
     "react": ">=15",
+    "react-dom": "*",
     "xstream": ">=10"
   },
   "scripts": {

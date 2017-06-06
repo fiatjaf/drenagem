@@ -16,13 +16,14 @@ rollup.rollup({
     }),
     commonjs({
       namedExports: {
-        'react': [ 'Component' ]
+        'react': [ 'Component' ],
+        'react-dom': [ 'findDOMNode', 'render' ]
       }
     }),
     buble({ dangerousTaggedTemplateString: true }),
     sourcemaps()
   ],
-  external: [ 'react', 'xstream' ]
+  external: [ 'react', 'xstream', 'react-dom' ]
 })
 .then(bundle => {
   bundle.write({
@@ -31,8 +32,9 @@ rollup.rollup({
     moduleName: 'dreno',
     moduleId: 'dreno',
     globals: {
-      xstream: 'xstream',
-      react: 'React'
+      'xstream': 'xstream',
+      'react': 'React',
+      'react-dom': 'ReactDOM'
     }
   })
   .then(() => console.log('written lib/dreno.umd.js'))
